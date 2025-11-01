@@ -42,6 +42,7 @@ body {
     font-size: 1.2rem;
     color: var(--color-grey);
     margin-top: 1.5rem;
+    line-height: 1.5; /* 增加行高 */
 }
 hr {
     border: 0;
@@ -106,8 +107,10 @@ hr {
     text-align: left;
     margin-bottom: 2rem;
 }
+
+/* 【★ 已修改 ★】 放大 "你抽到了..." */
 #result-content h3 {
-    font-size: 1.3rem;
+    font-size: 1.5rem; 
     color: var(--color-grey);
 }
 #result-content .event-title {
@@ -115,14 +118,18 @@ hr {
     margin-top: 0.5rem;
     margin-bottom: 1rem;
 }
+
+/* 【★ 已修改 ★】 放大 "情境：" 和 "效果：" */
 #result-content h4 {
-    font-size: 1.2rem;
+    font-size: 1.4rem; 
     color: var(--color-grey);
     margin-bottom: 0.5rem;
     margin-top: 1.5rem;
 }
+
+/* 【★ 已修改 ★】 放大 "情境內容" */
 #result-content .event-description {
-    font-size: 1.3rem;
+    font-size: 1.5rem; 
     line-height: 1.6;
 }
 #result-content .event-effect h2 {
