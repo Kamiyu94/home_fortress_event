@@ -28,6 +28,7 @@ body {
     width: 100%;
     max-width: 500px;
     text-align: center;
+    position: relative; /* 為了重置按鈕定位 */
 }
 .screen.active {
     display: block; /* 顯示當前畫面 */
@@ -37,6 +38,7 @@ body {
 .title {
     font-size: 2.5rem; /* 超大字體 */
     margin-bottom: 2rem;
+    margin-top: 4rem; /* 為重置按鈕留出空間 */
 }
 .prompt-text {
     font-size: 1.2rem;
@@ -49,6 +51,28 @@ hr {
     border-top: 2px solid var(--color-grey);
     margin: 1.5rem 0;
 }
+
+/* 【★ 新增 ★】 首頁重置按鈕樣式 */
+.btn-home-reset {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--color-grey);
+    font-size: 1rem;
+    padding: 0.6rem 0.8rem;
+}
+
+/* 【★ 新增 ★】 牌庫為空提示樣式 */
+.deck-status-container {
+    margin-top: 1.5rem;
+}
+.deck-status-warning {
+    color: var(--color-red);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
 
 /* --- 畫面一：抽取按鈕 --- */
 .draw-button-container {
