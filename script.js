@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnContinue = document.getElementById('btn-continue');
     const btnReset = document.getElementById('btn-reset');
     
-    // 【★ 新增 ★】 獲取新按鈕和提示文字
+    // 【★ 獲取新按鈕 ★】 (根據您的 index.html)
     const btnResetHome = document.getElementById('btn-reset-home');
     const chanceEmptyWarning = document.getElementById('chance-empty');
     const fateEmptyWarning = document.getElementById('fate-empty');
@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- 原始 7 張 ---
             { id: 'C1', title: '政府物資配給', description: '國軍/區公所冒險運來一批物資，你們幸運地領到了。', type: 'outcome', effect: '獲得「水 +10L」與「米 +5kg」。' },
             { id: 'C2', title: '醫療資源抵達', description: '無國界醫生或友軍醫療團設立了臨時醫療站。', type: 'outcome', effect: '全組 健康點數 +6。若有特殊身份者，該成員額外 +3 點。' },
-            // 【★ 已修改 ★】
             { id: 'C3', title: '幸運的發現', description: '你在巡視時，發現一間被遺棄的雜貨店還剩下一些有用的東西。', type: 'outcome', effect: '獲得「罐頭 x5」與「照明設備 x1」。' },
             { id: 'C4', title: '可靠的情報', description: '你的收音機接收到友軍的安全廣播，提振了士氣。', type: 'outcome', effect: '全組 健康點數 +3。(若無收音機則無效)' },
             { id: 'C5', title: '意外的潔淨水源', description: '你發現一處未受污染的隱藏水源（例如：未被發現的井）。', type: 'outcome', effect: '獲得「水 +20L」若有濾水器，則「水 +30L」。' },
@@ -47,17 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // --- 原始 7 張 (來自上次更新) ---
             { id: 'C8', title: '鄰居的善意', description: '一位友善的鄰居與你分享了多餘的物資。', type: 'outcome', effect: '獲得「醫療包 x1」與「水 x5L」。' },
-            { id: 'C9', title: '搜到醫療箱', description: '你在廢棄的車輛中找到一個完整的醫療箱。', type: 'outcome', effect: '獲得「醫療包 x1」、「消毒用品(酒精) x10L」與「水 x5L」。' },
+            // 【★ 修正 #3 ★】
+            { id: 'C9', title: '搜到醫療箱', description: '你在廢棄的車輛中找到一個完整的醫療箱。', type: 'outcome', effect: '獲得「醫療包 x1」、「消毒用品(酒精) x4L」與「水 x5L」。' },
             { id: 'C10', title: '衛生用品補給', description: '人道組織空投了一批衛生用品，你撿到了包裹。', type: 'outcome', effect: '獲得「水 x2L」與「醫療包 x1」。' },
             { id: 'C11', title: '臨時通訊站', description: '友軍架設了臨時通訊站，你成功聯絡上家人報平安。', type: 'outcome', effect: '全組 健康點數 +3。若有無線電則全組 健康點數 +6' },
             { id: 'C12', title: '能源補給', description: '你找到一包未開封的物資。', type: 'outcome', effect: '獲得「米 x10kg」與「照明設備 x1」。' },
             { id: 'C13', title: '發現嬰兒用品 (陷阱)', description: '你發現了一批「嬰兒用品」，但這是個陷阱，你觸發了警報並倉皇逃離。', type: 'outcome', effect: '全組 健康點數 -2 (因驚嚇)。' },
             { id: 'C14', title: '乾淨的衣物', description: '你找到一個被遺棄的行李箱，裡面有乾淨的衣物可供更換。', type: 'outcome', effect: '全組 健康點數 +2 (士氣提升)。' },
             
-            // --- 【★ 新增選擇題 ★】 ---
+            // --- 新增選擇題 ---
+            // 【★ 修正 #1 ★】
             { id: 'C15', title: '受困的商人', description: '你發現一名商人被壓在貨物下。你聽到了遠處有威脅... ', type: 'choice',
                 choices: [
-                    { text: '花時間救他 (需 1x 醫療包)', effect: '交出「醫療包 x1」。商人感謝你，並給了你「現金 2萬」。(若無常備藥則無法選擇)' },
+                    { text: '花時間救他 (需 1x 醫療包)', effect: '交出「醫療包 x1」。商人感謝你，並給了你「現金 2萬」。(若無醫療包則無法選擇)' },
                     { text: '快速搜刮他的貨物', effect: '獲得「罐頭 x3」。全組 健康點數 -2 (因良心不安)。' }
                 ]
             },
@@ -92,17 +93,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- 原始 8 張 (來自上次更新) ---
             { id: 'F9', title: '傳染病發作', description: '組內一名成員的傳染病發作，急需藥物。', type: 'outcome', effect: '損失「醫療包 x2」。(若無藥物，全組 健康點數 -6)' },
             { id: 'F10', title: '寵物/嬰兒生病', description: '家中的寵物或嬰兒生病了，需要額外照顧。', type: 'outcome', effect: '全組 健康點數 -3 (因焦慮)。並額外 損失「乾淨的水 1L」。' },
+            // 【★ 修正 #4 ★】
             { id: 'F11', title: '幫派索取保護費', description: '當地幫派前來索取保護費。', type: 'choice', 
                 choices: [ 
-                    { text: '支付物資', effect: '交出「金錢 x10,000」。幫派這週不會找你麻煩。' }, 
+                    { text: '支付物資', effect: '交出「現金 x10,000」。幫派這週不會找你麻煩。' }, 
                     { text: '拒絕支付', effect: '你拒絕了。全組 健康點數 -3 (因恐懼)，若有防衛性武器則無損失。' } 
                 ] 
             },
             { id: 'F12', title: '飲用水污染', description: '你儲存的一批飲用水因容器破裂而受到污染。', type: 'outcome', effect: '損失「飲用水 5L」。(若有「濾水器」，則損失2L)。' },
             { id: 'F13', title: '衛生用品短缺', description: '組內的女性成員生理期來了，但衛生用品不足。', type: 'outcome', effect: '全組 健康點數 -2 (因不適與壓力)。(若有準備「女性生理用品或醫療包」，可豁免)。' },
+            // 【★ 修正 #2 ★】
             { id: 'F14', title: '嚴重外傷', description: '一名成員在偵查時不慎受了重傷，血流不止。', type: 'choice', 
                 choices: [ 
-                    { text: '使用醫療包', effect: '消耗「醫療 x1」。' }, 
+                    { text: '使用醫療包', effect: '消耗「醫療包 x1」。' }, 
                     { text: '簡易處理', effect: '全組 健康點數 -6 (因感染風險)。' } 
                 ] 
             },
@@ -112,10 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     { text: '武力對抗', effect: '全組 健康點數 -3。 (若有「防衛性武器」，則改為 獲得「糧食 x1包」)。' } 
                 ] 
             },
-            // 【★ 已修改 ★】
-            { id: 'F16', title: '失去光明', description: '你最後的照明設備壞了，暴露出安全風險。', type: 'outcome', effect: '損失「照明設備 x1」。(若無照明設備，全組 健康點數 -3)。' },
+            { id: 'F16', title: '失去光明', description: '你最後的照明設備壞了，暴露出安全風險。', type: 'outcome', effect: '損失「照明設備 x1」。(若無照明設備，全組 健康點T -3)。' },
 
-            // --- 【★ 新增選擇題 ★】 ---
+            // --- 新增選擇題 ---
             { id: 'F17', title: '可疑的空投', description: '你看到一個空投物資箱降落在附近，但那裡看起來很空曠。', type: 'choice',
                 choices: [
                     { text: '攜帶武器前往 (需 防衛性武器)', effect: '你遭遇了埋伏，但在抵抗後成功帶走物資。獲得「四人份糧食 x1週份」。全組 健康點數 -3 (因戰鬥)。(若無武器無法選擇)' },
@@ -322,12 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
         determinedDeck = null; 
         promptText.textContent = '(點擊上方區域以抽取)'; 
 
-        // 【★ 新增 ★】 檢查牌庫並更新首頁提示
+        // 檢查牌庫並更新首頁提示
         chanceEmptyWarning.style.display = mainDecks.chance.length === 0 ? 'block' : 'none';
         fateEmptyWarning.style.display = mainDecks.fate.length === 0 ? 'block' : 'none';
     }
     
-    // 【★ 新增 ★】 統一的重置函數
+    // 統一的重置函數
     function handleReset() {
         if (confirm('確定要重置所有牌庫嗎？（已抽過的卡片會全部放回去）')) {
             resetDecks();
@@ -374,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 點擊「重置牌庫」 (結果頁)
     btnReset.addEventListener('click', handleReset);
     
-    // 【★ 新增 ★】 點擊「重置牌庫」 (首頁)
+    // 點擊「重置牌庫」 (首頁)
     btnResetHome.addEventListener('click', handleReset);
 
     // --- 6. 程式啟動 ---
@@ -382,4 +384,3 @@ document.addEventListener('DOMContentLoaded', () => {
     goHome(); // 顯示主畫面並開始閃動
 
 });
-
