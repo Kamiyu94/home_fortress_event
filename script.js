@@ -20,20 +20,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnReset = document.getElementById('btn-reset');
 
     // --- 2. 事件卡片數據 ---
-    // (type: 'outcome' = 直接結果, 'choice' = 需選擇)
     // (formatEffect: 用來格式化文字的輔助函數)
     const formatEffect = (text) => {
         return text.replace(/(\+[\d\.]+\s*點)/g, '<span class="text-green">$1</span>')
                    .replace(/(-[\d\.]+\s*點)/g, '<span class="text-red">$1</span>')
                    .replace(/損失\s*(.*?)(?=\s*。|$|,)/g, '<span class="text-red">損失 $1</span>')
                    .replace(/(獲得|換取)\s*「(.*?)」/g, '$1「<span class="text-blue-bold">$2</span>」')
-                   // 【修改】讓「支付」也顯示為紅色
                    .replace(/(交出|支付)\s*「(.*?)」/g, '<span class="text-red">$1「<span class="text-blue-bold">$2</span>」</span>');
     };
     
+    // 【★ 已修改 ★】 增加新事件，總共 30 個
     let cardData = {
         chance: [
-            // (機會牌庫內容不變)
             { id: 'C1', title: '政府物資配給', description: '國軍/區公所冒險運來一批物資，你們幸運地領到了。', type: 'outcome', effect: '獲得「水 +10L」與「米 +5kg」。' },
             { id: 'C2', title: '醫療資源抵達', description: '無國界醫生或友軍醫療團設立了臨時醫療站。', type: 'outcome', effect: '全組 健康點數 +6。若有特殊身份者，該成員額外 +3 點。' },
             { id: 'C3', title: '幸運的發現', description: '你在巡視時，發現一間被遺棄的雜貨店還剩下一些有用的東西。', type: 'outcome', effect: '獲得「罐頭 x5」與「電池 x10」。' },
@@ -41,32 +39,59 @@ document.addEventListener('DOMContentLoaded', () => {
             { id: 'C5', title: '意外的潔淨水源', description: '你發現一處未受污染的隱藏水源（例如：未被發現的井）。', type: 'outcome', effect: '獲得「水 +20L」。' },
             { id: 'C6', title: '物資腐敗 (陷阱)', description: '你打開一箱存糧，發現因為儲存不當，已經全部腐敗發霉。', type: 'outcome', effect: '損失 20% 的米或乾糧。' },
             { id: 'C7', title: '假情報 (陷阱)', description: '你們聽到假消息，以為有空投物資，冒險外出卻一無所獲。', type: 'outcome', effect: '全組 健康點數 -3。並額外 損失「水 -1L」與「乾糧 -1包」。' },
+            // 【★ 新增事件 ★】
+            { id: 'C8', title: '鄰居的善意', description: '一位友善的鄰居與你分享了多餘的物資。', type: 'outcome', effect: '獲得「常備藥 x1」與「紗布 x5」。' },
+            { id: 'C9', title: '搜到醫療箱', description: '你在廢棄的車輛中找到一個完整的醫療箱。', type: 'outcome', effect: '獲得「OK蹦 x1盒」、「消毒用品(酒精) x1」與「紗布 x1捲」。' },
+            { id: 'C10', title: '衛生用品補給', description: '人道組織空投了一批衛生用品，你撿到了包裹。', type: 'outcome', effect: '獲得「肥皂 x2」與「衛生紙 x1捲」。' },
+            { id: 'C11', title: '臨時通訊站', description: '友軍架設了臨時通訊站，你成功聯絡上家人報平安。', type: 'outcome', effect: '全組 健康點數 +3。' },
+            { id: 'C12', title: '能源補給', description: '你找到一包未開封的物資。', type: 'outcome', effect: '獲得「蠟燭 x10」與「電池 x5」。' },
+            { id: 'C13', title: '發現嬰兒用品 (陷阱)', description: '你發現了一批「嬰兒用品」，但這是個陷阱，你觸發了警報並倉皇逃離。', type: 'outcome', effect: '全組 健康點數 -2 (因驚嚇)。' },
+            { id: 'C14', title: '乾淨的衣物', description: '你找到一個被遺棄的行李箱，裡面有乾淨的衣物可供更換。', type: 'outcome', effect: '全組 健康點數 +2 (士氣提升)。' }
         ],
         fate: [
-            // 【★ 已修改 ★】
             { id: 'F1', title: '第五縱隊襲擊', description: '合作者對你們的住所發動攻擊，雖然被擊退，但造成了損失。', type: 'outcome', effect: '全組 健康點數 -6。並 損失「30% 的水與30% 的糧食」。' },
-            
-            // (F2, F3, F4, F5, F6 不變)
-            { id: 'F2', title: '鄰居搶食', description: '斷糧的鄰居破門而入，在混亂中搶走了你們的食物。', type: 'outcome', effect: '損失「米 x5kg」與「罐頭 x10」。(若有居家強固，損失減半)。' },
+            // 【★ 已修改 ★】
+            { id: 'F2', title: '鄰居搶食', description: '斷糧的鄰居破門而入，在混亂中搶走了你們的食物。', type: 'outcome', effect: '損失「米 x5kg」與「罐頭 x10」。(若有「防衛性武器」，損失減半)。' },
             { id: 'F3', title: '第五縱隊縱火', description: '附近發生縱火，濃煙與恐慌造成了嚴重壓力。', type: 'outcome', effect: '全組 健康點數 -3。' },
             { id: 'F4', title: '衛生危機', description: '由於廢棄物處理不當，組內爆發了傳染病。', type: 'outcome', effect: '全組 健康點數 -6。(若有準備「漂白水/消毒用品」，則改為 -2 點)。' },
             { id: 'F5', title: '精神崩潰', description: '長期的壓力下，一名成員精神狀況不穩，歇斯底里地破壞了物品。', type: 'outcome', effect: '損失「糧食」一人份。全組 健康點數 -3。(若有準備「無電娛樂用品」，可豁免)。' },
             { id: 'F6', title: '意外的轉折', description: '敵軍的空襲剛好炸開了附近無人銀行的金庫，你冒險撿到一些可用物資。', type: 'outcome', effect: '獲得「現金 10 萬」。' },
-            
-            // 【★ 已修改 ★】
             { id: 'F7', title: '絕望的求助者', description: '一位帶著嬰兒的母親敲門，乞求你們給她一些食物與水。', type: 'choice',
                 choices: [
                     { text: '幫助她', effect: '交出「一個人七天份的糧食與水」。全組 健康點數 -2 (因失去物資的焦慮)。' },
                     { text: '拒絕她', effect: '全組 健康點數 -6 (因巨大的心理壓力與罪惡感)。' }
                 ]
             },
-            // 【★ 已修改 ★】
             { id: 'F8', title: '黑市商人', description: '一個黑市商人路過，他願意交換物資，但只收現金。', type: 'choice',
                 choices: [
                     { text: '交易 (需有現金)', effect: '支付「20,000 現金」。換取「四個人一週的糧食與水」或「其他想要的物品」。(若無現金則無法交易)' },
                     { text: '拒絕交易', effect: '沒有任何變化。' }
                 ]
-            }
+            },
+            // 【★ 新增事件 ★】
+            { id: 'F9', title: '慢性病發作', description: '組內一名成員的慢性病發作，急需藥物。', type: 'outcome', effect: '損失「常備藥 x2」。(若無藥物，全組 健康點數 -6)' },
+            { id: 'F10', title: '寵物/嬰兒生病', description: '家中的寵物或嬰兒生病了，需要額外照顧。', type: 'outcome', effect: '全組 健康點數 -3 (因焦慮)。並額外 損失「乾淨的水 1L」。' },
+            { id: 'F11', title: '幫派索取保護費', description: '當地幫派前來索取保護費。', type: 'choice', 
+                choices: [ 
+                    { text: '支付物資', effect: '交出「罐頭 x10」。幫派這週不會找你麻煩。' }, 
+                    { text: '拒絕支付', effect: '你拒絕了。全組 健康點數 -3 (因恐懼)，且 損失「防衛性武器 x1」。' } 
+                ] 
+            },
+            { id: 'F12', title: '飲用水污染', description: '你儲存的一批飲用水因容器破裂而受到污染。', type: 'outcome', effect: '損失「飲用水 5L」。(若有「濾水器」，則損失減半)。' },
+            { id: 'F13', title: '衛生用品短缺', description: '組內的女性成員生理期來了，但衛生用品不足。', type: 'outcome', effect: '全組 健康點數 -2 (因不適與壓力)。(若有準備「女性生理用品」，可豁免)。' },
+            { id: 'F14', title: '嚴重外傷', description: '一名成員在偵查時不慎受了重傷，血流不止。', type: 'choice', 
+                choices: [ 
+                    { text: '使用醫療品', effect: '消耗「紗布 x1捲」與「消毒用品 x1瓶」。' }, 
+                    { text: '簡易包紮', effect: '全組 健康點數 -6 (因感染風險)。' } 
+                ] 
+            },
+            { id: 'F15', title: '絕望的士兵', description: '一名崩潰的逃兵闖入，要求你交出所有食物。', type: 'choice', 
+                choices: [ 
+                    { text: '交出食物', effect: '損失「30% 的糧食」。' }, 
+                    { text: '武力對抗', effect: '全組 健康點數 -3。 (若有「防衛性武器」，則改為 獲得「糧食 x1包」)。' } 
+                ] 
+            },
+            { id: 'F16', title: '失去光明', description: '你最後的照明設備壞了，暴露出安全風險。', type: 'outcome', effect: '損失「電池 x10」或「蠟燭 x1盒」。(若兩者皆無，全組 健康點數 -3)。' }
         ]
     };
 
@@ -165,6 +190,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }, totalAnimationTime); // 在 1500ms 後執行停止
     }
 
+    // 【★ 新增功能 ★】 強制選擇唯一剩下的牌庫
+    function forceDeckChoice(deckType) {
+        const deckName = deckType === 'chance' ? '機會' : '命運';
+        const colorClass = deckType === 'chance' ? 'green' : 'red';
+        
+        drawButtonText.textContent = deckName;
+        drawButton.className = `draw-button-container ${colorClass}`;
+        determinedDeck = deckType;
+        
+        // 更新提示文字，告知使用者這是唯一的選項
+        promptText.innerHTML = `您抽中了 <span class="deck-name ${colorClass}">${deckName}</span>！(這是唯一剩下的牌庫)<br>請再次點擊上方區域抽牌`;
+        isDrawing = false; // 允許第二次點擊
+    }
+
     // 顯示讀取畫面
     function showLoading(deckType) {
         const deckName = deckType === 'chance' ? '機會' : '命運';
@@ -181,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawCard(deckType) {
         let deck = mainDecks[deckType];
         
+        // 再次檢查 (雖然按鈕邏輯已擋下，但作為保險)
         if (deck.length === 0) {
             alert(`「${deckType === 'chance' ? '機會' : '命運'}」牌庫已經抽完！請重置牌庫。`);
             goHome(); 
@@ -261,19 +301,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 5. 綁定事件監聽 ---
     
-    // 點擊抽取器的主要邏輯
+    // 【★ 已修改 ★】 點擊抽取器的主要邏輯，加入牌庫檢查
     drawButton.addEventListener('click', () => {
         if (isDrawing) return; // 如果正在動畫中，禁止點擊
 
         if (determinedDeck) {
             // --- 狀態 B：已經選好牌庫，第二次點擊 ---
-            isDrawing = true; // 鎖定點擊，防止讀取時又點
-            showLoading(determinedDeck); // 執行讀取和抽卡
-            determinedDeck = null; // 清除狀態
+            isDrawing = true; 
+            showLoading(determinedDeck); 
+            determinedDeck = null; 
         } else {
-            // --- STATE A：尚未選定牌庫，第一次點擊 ---
-            isDrawing = true; // 鎖定點擊，防止動畫時又點
-            playDrawAnimation(); // 開始跑動畫
+            // --- 狀態 A：尚未選定牌庫，第一次點擊 ---
+            
+            // 【★ 新增邏輯 ★】 檢查牌庫
+            const chanceCards = mainDecks.chance.length;
+            const fateCards = mainDecks.fate.length;
+
+            if (chanceCards === 0 && fateCards === 0) {
+                // 兩個都抽完了
+                alert('所有牌庫都已抽完，請重置牌庫！');
+                return; // 不執行任何動作
+            }
+
+            isDrawing = true; // 鎖定點擊
+
+            if (chanceCards > 0 && fateCards > 0) {
+                // 兩個都還有，正常跑動畫
+                playDrawAnimation(); 
+            } else if (chanceCards > 0 && fateCards === 0) {
+                // 只剩機會
+                forceDeckChoice('chance');
+            } else if (chanceCards === 0 && fateCards > 0) {
+                // 只剩命運
+                forceDeckChoice('fate');
+            }
         }
     });
 
