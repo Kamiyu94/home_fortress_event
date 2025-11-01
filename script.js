@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const drawButton = document.getElementById('draw-button');
     const drawButtonText = document.getElementById('draw-button-text');
     const loadingText = document.getElementById('loading-text');
+    const promptText = document.querySelector('.prompt-text'); // 獲取提示文字
     
     const resultContent = document.getElementById('result-content');
     const choiceButtonsContainer = document.getElementById('choice-buttons');
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
                    .replace(/(-[\d\.]+\s*點)/g, '<span class="text-red">$1</span>')
                    .replace(/損失\s*(.*?)(?=\s*。|$|,)/g, '<span class="text-red">損失 $1</span>')
                    .replace(/(獲得|換取)\s*「(.*?)」/g, '$1「<span class="text-blue-bold">$2</span>」')
-                   .replace(/交出\s*「(.*?)」/g, '<span class="text-red">交出「<span class="text-blue-bold">$1</span>」</span>');
+                   .replace(/交出\s*「(.*?)」/g, '<span class="text-red">交出「<span class="text-blue-bold">$2</span>」</span>');
     };
     
     let cardData = {
@@ -66,12 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let discardPiles = {};
     let isDrawing = false; // 防止重複點擊
     let flashInterval; // 閃動動畫計時器
+    let determinedDeck = null; // 儲存第一階段抽到的牌庫 (chance 或 fate)
 
     // --- 4. 核心功能 ---
 
     // 初始化/重置牌庫
     function resetDecks() {
-        // 深拷貝一份原始數據，防止汙染
         mainDecks.chance = JSON.parse(JSON.stringify(cardData.chance));
         mainDecks.fate = JSON.parse(JSON.stringify(cardData.fate));
         discardPiles.chance = [];
@@ -105,19 +106,17 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(flashInterval);
     }
 
-    // 執行抽牌動畫
+    // 【★ 已修改 ★】執行抽牌動畫 (固定 1.5 秒)
     function playDrawAnimation() {
-        if (isDrawing) return;
-        isDrawing = true;
         stopFlashing();
+        promptText.textContent = '(抽取中...)'; // 更新提示文字
 
-        let speed = 50; // 初始速度
-        let duration = 600; // 加速階段時長
-        let slowdownTime = 2000; // 減速階段總時長
-        let isGreen = Math.random() < 0.5; // 初始狀態
+        let speed = 50; // 高速閃動的幀率 (50ms)
+        let totalAnimationTime = 1500; // 【修改點】總動畫時間 1.5 秒
+        let isGreen = Math.random() < 0.5;
         let animationTimeout;
 
-        // 1. 高速閃動階段
+        // 1. 高速閃動階段 (會一直跑到被下面的 setTimeout 停止)
         function fastFlash() {
             if (isGreen) {
                 drawButtonText.textContent = '機會';
@@ -126,39 +125,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 drawButtonText.textContent = '命運';
                 drawButton.className = 'draw-button-container red';
             }
-            isGreen = !isGreen;
+            isGreen = !isGreen; // 為下一幀做準備
             animationTimeout = setTimeout(fastFlash, speed);
         }
 
+        // 立即開始閃動
         fastFlash();
 
-        // 2. 停止加速，準備減速
+        // 2. 設定一個計時器，在 1.5 秒後「強制停止」
         setTimeout(() => {
-            clearTimeout(animationTimeout); // 停止高速閃動
+            
+            // 3. 停止高速閃動
+            clearTimeout(animationTimeout);
 
-            // 3. 漸漸減速階段
-            function slowDown(currentSpeed) {
-                if (currentSpeed > 1000) {
-                    // 4. 最終停止
-                    const finalDeck = isGreen ? 'fate' : 'chance'; // 上一幀是 green，停在 fate
-                    showLoading(finalDeck);
-                    return;
-                }
+            // 4. 決定最終結果
+            // 因為 isGreen 在 fastFlash 最後被翻轉了，
+            // 所以當前 isGreen 的「相反」才是畫面上顯示的。
+            const finalDeck = isGreen ? 'fate' : 'chance';
+            const deckName = finalDeck === 'chance' ? '機會' : '命運';
+            const colorClass = finalDeck === 'chance' ? 'green' : 'red';
+            
+            // 5. 強制設定最終畫面 (防止閃爍)
+            drawButtonText.textContent = deckName;
+            drawButton.className = `draw-button-container ${colorClass}`;
 
-                if (isGreen) {
-                    drawButtonText.textContent = '機會';
-                    drawButton.className = 'draw-button-container green';
-                } else {
-                    drawButtonText.textContent = '命運';
-                    drawButton.className = 'draw-button-container red';
-                }
-                isGreen = !isGreen;
-                
-                setTimeout(() => slowDown(currentSpeed * 1.3), currentSpeed); // 速度越來越慢
-            }
-            slowDown(speed * 10); // 從一個較慢的速度開始
+            // 6. 設定狀態，等待第二次點擊
+            determinedDeck = finalDeck; 
+            promptText.innerHTML = `您抽中了 <span class="deck-name ${colorClass}">${deckName}</span>！<br>請再次點擊上方區域抽牌`;
+            isDrawing = false; // 允許第二次點擊
 
-        }, duration);
+        }, totalAnimationTime); // 在 1500ms 後執行停止
     }
 
     // 顯示讀取畫面
@@ -177,28 +173,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawCard(deckType) {
         let deck = mainDecks[deckType];
         
-        // 檢查牌庫是否已空
         if (deck.length === 0) {
             alert(`「${deckType === 'chance' ? '機會' : '命運'}」牌庫已經抽完！請重置牌庫。`);
-            goHome(); // 回到主畫面
+            goHome(); 
             return;
         }
 
-        // 隨機抽一張
         const cardIndex = Math.floor(Math.random() * deck.length);
-        const card = deck.splice(cardIndex, 1)[0]; // 從牌庫移除
-        discardPiles[deckType].push(card); // 放入棄牌堆
+        const card = deck.splice(cardIndex, 1)[0]; 
+        discardPiles[deckType].push(card); 
 
         displayCard(card, deckType);
     }
 
     // 顯示卡片內容
     function displayCard(card, deckType) {
-        // 清空上次的結果
         resultContent.innerHTML = '';
         choiceButtonsContainer.innerHTML = '';
 
-        // 顯示基本資訊
         const deckName = deckType === 'chance' ? '機會' : '命運';
         const colorClass = deckType === 'chance' ? 'green' : 'red';
         resultContent.innerHTML += `
@@ -210,24 +202,19 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         if (card.type === 'outcome') {
-            // 直接結果
             resultContent.innerHTML += `
                 <h4>效果：</h4>
                 <div class="event-effect">
                     <h2>${formatEffect(card.effect)}</h2>
                 </div>
             `;
-            // 顯示控制按鈕
             controlButtonsContainer.style.display = 'flex';
             choiceButtonsContainer.style.display = 'none';
 
         } else if (card.type === 'choice') {
-            // 抉擇事件
-            // 隱藏控制按鈕
             controlButtonsContainer.style.display = 'none';
             choiceButtonsContainer.style.display = 'flex';
 
-            // 顯示抉擇按鈕
             card.choices.forEach(choice => {
                 const choiceBtn = document.createElement('button');
                 choiceBtn.className = 'btn btn-large btn-choice';
@@ -251,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h2>${formatEffect(choice.effect)}</h2>
             </div>
         `;
-        // 隱藏抉擇按鈕，顯示控制按鈕
         choiceButtonsContainer.style.display = 'none';
         controlButtonsContainer.style.display = 'flex';
     }
@@ -261,12 +247,27 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen('draw');
         startFlashing();
         isDrawing = false;
+        determinedDeck = null; // 重置抽中的牌庫狀態
+        promptText.textContent = '(點擊上方區域以抽取)'; // 重置提示文字
     }
 
     // --- 5. 綁定事件監聽 ---
     
-    // 點擊抽取器
-    drawButton.addEventListener('click', playDrawAnimation);
+    // 點擊抽取器的主要邏輯
+    drawButton.addEventListener('click', () => {
+        if (isDrawing) return; // 如果正在動畫中，禁止點擊
+
+        if (determinedDeck) {
+            // --- 狀態 B：已經選好牌庫，第二次點擊 ---
+            isDrawing = true; // 鎖定點擊，防止讀取時又點
+            showLoading(determinedDeck); // 執行讀取和抽卡
+            determinedDeck = null; // 清除狀態
+        } else {
+            // --- STATE A：尚未選定牌庫，第一次點擊 ---
+            isDrawing = true; // 鎖定點擊，防止動畫時又點
+            playDrawAnimation(); // 開始跑動畫
+        }
+    });
 
     // 點擊「繼續抽取」
     btnContinue.addEventListener('click', goHome);
@@ -282,6 +283,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 6. 程式啟動 ---
     resetDecks(); // 第一次加載時，初始化牌庫
     goHome(); // 顯示主畫面並開始閃動
-
 
 });
