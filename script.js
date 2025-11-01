@@ -27,11 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
                    .replace(/(-[\d\.]+\s*點)/g, '<span class="text-red">$1</span>')
                    .replace(/損失\s*(.*?)(?=\s*。|$|,)/g, '<span class="text-red">損失 $1</span>')
                    .replace(/(獲得|換取)\s*「(.*?)」/g, '$1「<span class="text-blue-bold">$2</span>」')
-                   .replace(/交出\s*「(.*?)」/g, '<span class="text-red">交出「<span class="text-blue-bold">$2</span>」</span>');
+                   // 【修改】讓「支付」也顯示為紅色
+                   .replace(/(交出|支付)\s*「(.*?)」/g, '<span class="text-red">$1「<span class="text-blue-bold">$2</span>」</span>');
     };
     
     let cardData = {
         chance: [
+            // (機會牌庫內容不變)
             { id: 'C1', title: '政府物資配給', description: '國軍/區公所冒險運來一批物資，你們幸運地領到了。', type: 'outcome', effect: '獲得「水 +10L」與「米 +5kg」。' },
             { id: 'C2', title: '醫療資源抵達', description: '無國界醫生或友軍醫療團設立了臨時醫療站。', type: 'outcome', effect: '全組 健康點數 +6。若有特殊身份者，該成員額外 +3 點。' },
             { id: 'C3', title: '幸運的發現', description: '你在巡視時，發現一間被遺棄的雜貨店還剩下一些有用的東西。', type: 'outcome', effect: '獲得「罐頭 x5」與「電池 x10」。' },
@@ -41,22 +43,28 @@ document.addEventListener('DOMContentLoaded', () => {
             { id: 'C7', title: '假情報 (陷阱)', description: '你們聽到假消息，以為有空投物資，冒險外出卻一無所獲。', type: 'outcome', effect: '全組 健康點數 -3。並額外 損失「水 -1L」與「乾糧 -1包」。' },
         ],
         fate: [
-            { id: 'F1', title: '第五縱隊襲擊', description: '合作者對你們的住所發動攻擊，雖然被擊退，但造成了損失。', type: 'outcome', effect: '全組 健康點數 -6。並 損失「30% 的藥品」。' },
+            // 【★ 已修改 ★】
+            { id: 'F1', title: '第五縱隊襲擊', description: '合作者對你們的住所發動攻擊，雖然被擊退，但造成了損失。', type: 'outcome', effect: '全組 健康點數 -6。並 損失「30% 的水與30% 的糧食」。' },
+            
+            // (F2, F3, F4, F5, F6 不變)
             { id: 'F2', title: '鄰居搶食', description: '斷糧的鄰居破門而入，在混亂中搶走了你們的食物。', type: 'outcome', effect: '損失「米 x5kg」與「罐頭 x10」。(若有居家強固，損失減半)。' },
             { id: 'F3', title: '第五縱隊縱火', description: '附近發生縱火，濃煙與恐慌造成了嚴重壓力。', type: 'outcome', effect: '全組 健康點數 -3。' },
             { id: 'F4', title: '衛生危機', description: '由於廢棄物處理不當，組內爆發了傳染病。', type: 'outcome', effect: '全組 健康點數 -6。(若有準備「漂白水/消毒用品」，則改為 -2 點)。' },
-            { id: 'F5', title: '精神崩潰', description: '長期的壓力下，一名成員精神狀況不穩，歇斯底里地破壞了物品。', type: 'outcome', effect: '損失「照明設備」一件。全組 健康點數 -3。(若有準備「無電娛樂用品」，可豁免)。' },
-            { id: 'F6', title: '意外的轉折', description: '敵軍的空襲剛好炸開了附近無人銀行的金庫，你冒險撿到一些可用物資。', type: 'outcome', effect: '獲得「醫療包 x2」。' },
-            { id: 'F7', title: '絕望的求助者', description: '一位帶著嬰兒的母親敲門，乞求你們給她一些藥品。', type: 'choice',
+            { id: 'F5', title: '精神崩潰', description: '長期的壓力下，一名成員精神狀況不穩，歇斯底里地破壞了物品。', type: 'outcome', effect: '損失「糧食」一人份。全組 健康點數 -3。(若有準備「無電娛樂用品」，可豁免)。' },
+            { id: 'F6', title: '意外的轉折', description: '敵軍的空襲剛好炸開了附近無人銀行的金庫，你冒險撿到一些可用物資。', type: 'outcome', effect: '獲得「現金 10 萬」。' },
+            
+            // 【★ 已修改 ★】
+            { id: 'F7', title: '絕望的求助者', description: '一位帶著嬰兒的母親敲門，乞求你們給她一些食物與水。', type: 'choice',
                 choices: [
-                    { text: '幫助她', effect: '交出「藥品 x1」。全組 健康點數 -2 (因失去物資的焦慮)。' },
+                    { text: '幫助她', effect: '交出「一個人七天份的糧食與水」。全組 健康點數 -2 (因失去物資的焦慮)。' },
                     { text: '拒絕她', effect: '全組 健康點數 -6 (因巨大的心理壓力與罪惡感)。' }
                 ]
             },
-            { id: 'F8', title: '黑市商人', description: '一個黑市商人路過，他願意交換物資。', type: 'choice',
+            // 【★ 已修改 ★】
+            { id: 'F8', title: '黑市商人', description: '一個黑市商人路過，他願意交換物資，但只收現金。', type: 'choice',
                 choices: [
-                    { text: '交易', effect: '交出「任一非消耗品 (如工具組)」，換取「瓦斯罐 x3」。' },
-                    { text: '拒絕', effect: '沒有任何變化。' }
+                    { text: '交易 (需有現金)', effect: '支付「20,000 現金」。換取「四個人一週的糧食與水」或「其他想要的物品」。(若無現金則無法交易)' },
+                    { text: '拒絕交易', effect: '沒有任何變化。' }
                 ]
             }
         ]
@@ -106,13 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(flashInterval);
     }
 
-    // 【★ 已修改 ★】執行抽牌動畫 (固定 1.5 秒)
+    // 執行抽牌動畫 (固定 1.5 秒)
     function playDrawAnimation() {
         stopFlashing();
         promptText.textContent = '(抽取中...)'; // 更新提示文字
 
         let speed = 50; // 高速閃動的幀率 (50ms)
-        let totalAnimationTime = 1500; // 【修改點】總動畫時間 1.5 秒
+        let totalAnimationTime = 1500; // 總動畫時間 1.5 秒
         let isGreen = Math.random() < 0.5;
         let animationTimeout;
 
