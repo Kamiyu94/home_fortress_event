@@ -130,21 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     { text: '試圖蒙混', effect: '你被識破並被粗暴對待。損失「米 x1kg」。全組 健康點數 -3。' }
                 ]
             },
-            { id: 'F19', title: '立委號召投降', description: '國民黨立委在網路上號召簽署投降協議，以換取和平。', type: 'choice',
-                choices: [
-                    { text: '簽署協議', effect: '全組 健康點數 +3 (因壓力解除)。但下一回合有機率觸發後續負面事件。' },
-                    { text: '拒絕簽署', effect: '全組 健康點數 -3 (因擔心被舉報或戰事持續)。' }
-                ]
-            },
-            { id: 'F20', title: '里長要求投降', description: '里長帶著米糧上門，要求你簽署投降協議。', type: 'choice',
-                choices: [
-                    { text: '簽署協議', effect: '獲得「米 x1kg」。全組 健康點數 +2 (避免衝突)。' },
-                    { text: '拒絕簽署', effect: '里長揚言舉報並做上記號。全組 健康點數 -6 (因恐懼與威脅)。' }
-                ]
-            },
-            // 【★ F21 修改處 ★】
-            { id: 'F21', title: '民防團成員反叛', description: '民防團裡有人背叛，捲走資源逃跑了。', type: 'outcome', effect: '損失「米 2kg」。(若有無線電可獲得通報，則可豁免損失)。' },
-        ]
         ]
     };
 
@@ -399,5 +384,3 @@ document.addEventListener('DOMContentLoaded', () => {
     goHome(); // 顯示主畫面並開始閃動
 
 });
-
-
