@@ -1,0 +1,4 @@
+# 告訴 Jekyll 哪些檔案/資料夾不要忽略
+include:
+  - style.css
+  - script.js
