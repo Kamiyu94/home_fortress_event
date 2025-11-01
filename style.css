@@ -135,7 +135,7 @@ hr {
 /* 【★ 已修改 ★】 放大 "你抽到了..." */
 #result-content h3 {
     font-size: 1.5rem; 
-    color: var(--color-grey);
+    color: #ffc107;
 }
 #result-content .event-title {
     font-size: 2.8rem;
@@ -146,7 +146,7 @@ hr {
 /* 【★ 已修改 ★】 放大 "情境：" 和 "效果：" */
 #result-content h4 {
     font-size: 1.4rem; 
-    color: var(--color-grey);
+    color: #ffc107;
     margin-bottom: 0.5rem;
     margin-top: 1.5rem;
 }
@@ -213,3 +213,4 @@ hr {
     background-color: var(--color-light);
     color: var(--color-dark);
 }
+
