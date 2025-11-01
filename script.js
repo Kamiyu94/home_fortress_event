@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { text: '武力對抗', effect: '全組 健康點數 -3。 (若有「防衛性武器」，則改為 獲得「糧食 x1包」)。' } 
                 ] 
             },
-            { id: 'F16', title: '失去光明', description: '你最後的照明設備壞了，暴露出安全風險。', type: 'outcome', effect: '損失「照明設備 x1」。(若無照明設備，全組 健康點T -3)。' },
+            { id: 'F16', title: '失去光明', description: '你最後的照明設備壞了，暴露出安全風險。', type: 'outcome', effect: '損失「照明設備 x1」。(若無照明設備，全組 健康點數 -3)。' },
 
             // --- 新增選擇題 ---
             { id: 'F17', title: '可疑的空投', description: '你看到一個空投物資箱降落在附近，但那裡看起來很空曠。', type: 'choice',
@@ -384,3 +384,4 @@ document.addEventListener('DOMContentLoaded', () => {
     goHome(); // 顯示主畫面並開始閃動
 
 });
+
