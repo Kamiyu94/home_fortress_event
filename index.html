@@ -4,16 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>回合事件抽取器</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="event_style.css">
 </head>
 <body>
 
     <div id="screen-draw" class="screen active">
+        
+        <button id="btn-reset-home" class="btn btn-small btn-home-reset">重置牌庫</button>
+        
         <h1 class="title">請抽取你的回合事件</h1>
         <div id="draw-button" class="draw-button-container">
             <h2 id="draw-button-text">機會</h2>
         </div>
         <p class="prompt-text">(點擊上方區域以抽取)</p>
+
+        <div class="deck-status-container">
+            <p id="chance-empty" class="deck-status-warning" style="display:none;">機會牌庫已抽完</p>
+            <p id="fate-empty" class="deck-status-warning" style="display:none;">命運牌庫已抽完</p>
+        </div>
     </div>
 
     <div id="screen-loading" class="screen">
@@ -34,6 +42,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="event_script.js"></script>
 </body>
 </html>
