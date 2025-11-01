@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stopFlashing();
 
         let speed = 50; // 初始速度
-        let duration = 1500; // 加速階段時長
+        let duration = 600; // 加速階段時長
         let slowdownTime = 2000; // 減速階段總時長
         let isGreen = Math.random() < 0.5; // 初始狀態
         let animationTimeout;
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 setTimeout(() => slowDown(currentSpeed * 1.3), currentSpeed); // 速度越來越慢
             }
-            slowDown(speed * 3); // 從一個較慢的速度開始
+            slowDown(speed * 10); // 從一個較慢的速度開始
 
         }, duration);
     }
@@ -282,5 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 6. 程式啟動 ---
     resetDecks(); // 第一次加載時，初始化牌庫
     goHome(); // 顯示主畫面並開始閃動
+
 
 });
