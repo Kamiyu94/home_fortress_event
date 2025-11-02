@@ -25,30 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const fateEmptyWarning = document.getElementById('fate-empty');
 
     // --- 2. 事件卡片數據 ---
-
-    // 【★ 已修改 ★】 更新此函式以辨識新詞彙
     const formatEffect = (text) => {
-        let formattedText = text;
-
-        // 1. 處理點數 (最優先)
-        // 綠色: +X 點
-        formattedText = formattedText.replace(/(\+[\d\.]+\s*點)/g, '<span class="text-green">$1</span>');
-        // 紅色: -X 點 或 健康點數 -X (沒有點)
-        formattedText = formattedText.replace(/(-[\d\.]+\s*點|健康點數\s*-\d+)(?=\s*。|\)|$|,)/g, '<span class="text-red">$1</span>');
-
-        // 2. 處理正面關鍵字
-        // 藍色: 獲得「」, 則獲得「」, 則改為 獲得「」, 換取「」
-        formattedText = formattedText.replace(/((?:則\s*|則改為\s*)?獲得|換取)\s*「(.*?)」/g, '$1「<span class="text-blue-bold">$2</span>」');
-        // 綠色: 無損失, 可豁免
-        formattedText = formattedText.replace(/(無損失|可豁免)(?=\s*。|\)|$|,)/g, '<span class="text-green">$1</span>');
-
-        // 3. 處理負面關鍵字
-        // 紅色: 交出「」, 支付「」, 消耗「」, 損失「」 (包含引號的)
-        formattedText = formattedText.replace(/(交出|支付|消耗|損失)\s*「(.*?)」/g, '<span class="text-red">$1「<span class="text-blue-bold">$2</span>」</span>');
-        // 紅色: 損失 (不含引號的), 則損失 (不含引號的)
-        formattedText = formattedText.replace(/((?:則)?損失)\s+(?!「)(.*?)(?=\s*。|$|,|\()/g, '<span class="text-red">$1 $2</span>');
-
-        return formattedText;
+        return text.replace(/(\+[\d\.]+\s*點)/g, '<span class="text-green">$1</span>')
+                   .replace(/(-[\d\.]+\s*點)/g, '<span class="text-red">$1</span>')
+                   .replace(/損失\s*(.*?)(?=\s*。|$|,)/g, '<span class="text-red">損失 $1</span>')
+                   .replace(/(獲得|換取)\s*「(.*?)」/g, '$1「<span class="text-blue-bold">$2</span>」')
+                   .replace(/(交出|支付)\s*「(.*?)」/g, '<span class="text-red">$1「<span class="text-blue-bold">$2</span>」</span>');
     };
     
     let cardData = {
@@ -58,14 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
             { id: 'C2', title: '醫療資源抵達', description: '無國界醫生或友軍醫療團設立了臨時醫療站。', type: 'outcome', effect: '全組 健康點數 +6。若有特殊身份者，該成員額外 +3 點。' },
             { id: 'C3', title: '幸運的發現', description: '你在巡視時，發現一間被遺棄的雜貨店還剩下一些有用的東西。', type: 'outcome', effect: '獲得「罐頭 x5」與「照明設備 x1」。' },
             { id: 'C4', title: '可靠的情報', description: '你的收音機接收到友軍的安全廣播，提振了士氣。', type: 'outcome', effect: '全組 健康點數 +3。(若無收音機則無效)' },
-            { id: 'C5', title: '意外的潔淨水源', description: '你發現一處未受污染的隱藏水源（例如：未被發現的井）。', type: 'outcome', effect: '獲得「水 +20L」若有濾水器，則獲得「水 +30L」。' },
+            { id: 'C5', title: '意外的潔淨水源', description: '你發現一處未受污染的隱藏水源（例如：未被發現的井）。', type: 'outcome', effect: '獲得「水 +20L」若有濾水器，則「水 +30L」。' },
             { id: 'C6', title: '物資腐敗 (陷阱)', description: '你打開一箱存糧，發現因為儲存不當，已經全部腐敗發霉。', type: 'outcome', effect: '損失 20% 的食物。' },
             { id: 'C7', title: '假情報 (陷阱)', description: '你們聽到假消息，以為有空投物資，冒險外出卻一無所獲。', type: 'outcome', effect: '全組 健康點數 -3。並額外 損失「水 -1L」與「乾糧 -1包」。' },
             
             // --- 原始 7 張 (來自上次更新) ---
             { id: 'C8', title: '鄰居的善意', description: '一位友善的鄰居與你分享了多餘的物資。', type: 'outcome', effect: '獲得「醫療包 x1」與「水 x5L」。' },
             // 【★ 修正 #3 ★】
-            { id: 'C9', title: '搜到醫療箱', description: '你在廢棄的車輛中找到一個完整的醫療箱。', type: 'outcome', effect: '獲得「醫療包 x2」與「水 x5L」。' },
+            { id: 'C9', title: '搜到醫療箱', description: '你在廢棄的車輛中找到一個完整的醫療箱。', type: 'outcome', effect: '獲得「醫療包 x1」、「消毒用品(酒精) x4L」與「水 x5L」。' },
             { id: 'C10', title: '衛生用品補給', description: '人道組織空投了一批衛生用品，你撿到了包裹。', type: 'outcome', effect: '獲得「水 x2L」與「醫療包 x1」。' },
             { id: 'C11', title: '臨時通訊站', description: '友軍架設了臨時通訊站，你成功聯絡上家人報平安。', type: 'outcome', effect: '全組 健康點數 +3。若有無線電則全組 健康點數 +6' },
             { id: 'C12', title: '能源補給', description: '你找到一包未開封的物資。', type: 'outcome', effect: '獲得「米 x10kg」與「照明設備 x1」。' },
@@ -221,7 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
             clearTimeout(animationTimeout);
-            stopFlashing(); // 【★ Bug 修正 ★】 確保所有計時器都被清除
 
             const finalDeck = isGreen ? 'fate' : 'chance';
             const deckName = finalDeck === 'chance' ? '機會' : '命運';
@@ -239,7 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 強制選擇唯一剩下的牌庫
     function forceDeckChoice(deckType) {
-        stopFlashing(); // 【★ Bug 修正 ★】 確保清除待機閃動
         const deckName = deckType === 'chance' ? '機會' : '命運';
         const colorClass = deckType === 'chance' ? 'green' : 'red';
         
@@ -253,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 顯示讀取畫面
     function showLoading(deckType) {
-        stopFlashing(); // 【★ Bug 修正 ★】 確保清除待機閃動
         const deckName = deckType === 'chance' ? '機會' : '命運';
         const colorClass = deckType === 'chance' ? 'green' : 'red';
         loadingText.innerHTML = `正在從 <span class="deck-name ${colorClass}">${deckName}</span> 牌庫抽取...`;
@@ -326,4 +305,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 顯示抉擇後的結果
     function showChoiceResult(choice) {
-        resultContent.innerHTML +=
+        resultContent.innerHTML += `
+            <hr>
+            <h4>你的決定：${choice.text}</h4>
+            <div class="event-effect">
+                <h2>${formatEffect(choice.effect)}</h2>
+            </div>
+        `;
+        choiceButtonsContainer.style.display = 'none';
+        controlButtonsContainer.style.display = 'flex';
+    }
+
+    // 回到主畫面
+    function goHome() {
+        switchScreen('draw');
+        startFlashing();
+        isDrawing = false;
+        determinedDeck = null; 
+        promptText.textContent = '(點擊上方區域以抽取)'; 
+
+        // 檢查牌庫並更新首頁提示
+        chanceEmptyWarning.style.display = mainDecks.chance.length === 0 ? 'block' : 'none';
+        fateEmptyWarning.style.display = mainDecks.fate.length === 0 ? 'block' : 'none';
+    }
+    
+    // 統一的重置函數
+    function handleReset() {
+        if (confirm('確定要重置所有牌庫嗎？（已抽過的卡片會全部放回去）')) {
+            resetDecks();
+            goHome();
+        }
+    }
+
+    // --- 5. 綁定事件監聽 ---
+    
+    // 點擊抽取器的主要邏輯
+    drawButton.addEventListener('click', () => {
+        if (isDrawing) return; 
+
+        if (determinedDeck) {
+            // --- 狀態 B：已經選好牌庫，第二次點擊 ---
+            isDrawing = true; 
+            showLoading(determinedDeck); 
+            determinedDeck = null; 
+        } else {
+            // --- 狀態 A：尚未選定牌庫，第一次點擊 ---
+            const chanceCards = mainDecks.chance.length;
+            const fateCards = mainDecks.fate.length;
+
+            if (chanceCards === 0 && fateCards === 0) {
+                alert('所有牌庫都已抽完，請重置牌庫！');
+                return; 
+            }
+
+            isDrawing = true; 
+
+            if (chanceCards > 0 && fateCards > 0) {
+                playDrawAnimation(); 
+            } else if (chanceCards > 0 && fateCards === 0) {
+                forceDeckChoice('chance');
+            } else if (chanceCards === 0 && fateCards > 0) {
+                forceDeckChoice('fate');
+            }
+        }
+    });
+
+    // 點擊「繼續抽取」
+    btnContinue.addEventListener('click', goHome);
+
+    // 點擊「重置牌庫」 (結果頁)
+    btnReset.addEventListener('click', handleReset);
+    
+    // 點擊「重置牌庫」 (首頁)
+    btnResetHome.addEventListener('click', handleReset);
+
+    // --- 6. 程式啟動 ---
+    resetDecks(); // 第一次加載時，初始化牌庫
+    goHome(); // 顯示主畫面並開始閃動
+
+});
