@@ -1,11 +1,7 @@
-// 【★ 請您將以下兩行修改為您實際的 GID 值 ★】
-const CHANCE_SHEET_GID = '0'; // 這是您 Chance 牌庫的 GID
-const FATE_SHEET_GID = '995792555'; // <--- 請替換為您 Fate 工作表的實際 GID 號碼
-
-// 【★ 請使用以下程式碼完整替換您的 script.js 內容 ★】
+// 【★ 請您再次確認這 3 行是您正確的 GID ★】
 const SPREADSHEET_ID = '1pEwL40e9FDGOV5b9o1lLEDhr_MSrIYqFrHmn89WFFko'; 
-const CHANCE_SHEET_GID = '0'; // 這是您 Chance 牌庫的 GID (已確認為 0)
-const FATE_SHEET_GID = '995792555'; // <--- 請替換為您 Fate 工作表的實際 GID 號碼！
+const CHANCE_SHEET_GID = '0'; // <--- 您的 Chance GID
+const FATE_SHEET_GID = '995792555'; // <--- 您的 Fate GID (請替換!)
 
 // Google Visualization API URL 格式 (最穩定)
 const SHEETS_V4_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&gid=`;
@@ -52,38 +48,43 @@ let determinedDeck = null;
 
 // --- 4. 核心功能 ---
 
-// 【★ 修正後的解析函式，處理 Sheets V4 格式 ★】
+// 【★ 修正後的解析函式，處理空工作表 ★】
 function parseGoogleSheet(data) {
-    // 移除 Google 傳輸安全代碼，只留下 JSON 內容
     const jsonText = data.match(/google\.visualization\.Query\.setResponse\((.*)\);/);
     if (!jsonText || !jsonText[1]) {
         throw new Error("Google Sheet JSON 格式解析失敗。");
     }
     const queryData = JSON.parse(jsonText[1]);
-    const rows = queryData.table.rows;
+    
+    // 【★ 關鍵修正 1 ★】
+    // 檢查 table 和 cols 是否存在
+    if (!queryData.table || !queryData.table.cols) {
+         throw new Error("工作表結構錯誤，找不到欄位 (cols)。請確認 GID 是否指向了正確的工作表。");
+    }
+    
     const cols = queryData.table.cols;
-    const cards = [];
-
-    // 取得欄位名稱 (從第一行標題)
     const headers = cols.map(col => col.label);
+    
+    // 【★ 關鍵修正 2 ★】
+    // 檢查 rows 是否存在，如果不存在 (null)，則視為空陣列
+    const rows = queryData.table.rows || []; 
+    const cards = [];
 
     rows.forEach(row => {
         const rowValues = row.c;
         if (!rowValues) return;
 
-        // 建立基本卡片結構
         const card = { choices: [] };
         let choiceIndex = 1;
 
         headers.forEach((header, i) => {
             const value = rowValues[i] && rowValues[i].v !== null ? rowValues[i].v : (rowValues[i] && rowValues[i].f ? rowValues[i].f : '');
             
-            // 特殊處理 choice 欄位
             if (header.startsWith('choice') && header.endsWith('text')) {
                 if (value) {
                     card.choices.push({
                         text: value,
-                        effect: '' // 待會用 effect 補齊
+                        effect: '' 
                     });
                 }
             } else if (header.startsWith('choice') && header.endsWith('effect')) {
@@ -96,17 +97,15 @@ function parseGoogleSheet(data) {
             }
         });
         
-        // 清理 choices 陣列，確保長度正確
         card.choices = card.choices.filter(c => c.text);
 
-        // 如果卡片類型是 'outcome'，確保 choices 陣列為空
         if (card.type === 'outcome' || card.type === '') {
             delete card.choices;
         }
         
         cards.push(card);
     });
-    return cards.filter(card => card.id); // 確保只返回有 ID 的卡片
+    return cards.filter(card => card.id); 
 }
 
 /**
@@ -116,7 +115,6 @@ async function loadGameData() {
     switchScreen('loading');
     loadingText.innerHTML = '正在從 Google Sheet 載入事件資料...';
 
-    // 使用 Sheets V4 格式和 GID
     const chanceURL = SHEETS_V4_URL + CHANCE_SHEET_GID;
     const fateURL = SHEETS_V4_URL + FATE_SHEET_GID;
     
@@ -127,18 +125,19 @@ async function loadGameData() {
         ]);
 
         if (!chanceResponse.ok || !fateResponse.ok) {
-            throw new Error('無法抓取 Google Sheet 資料。請確認已「發佈到網路」或 GID 錯誤。');
+            throw new Error('無法抓取 Google Sheet 資料。請確認已「發佈到網路」且 GID 正確。');
         }
 
-        const chanceData = await chanceResponse.text(); // V4 回傳是純文字
+        const chanceData = await chanceResponse.text(); 
         const fateData = await fateResponse.text();
 
-        // 解析資料並存入 cardData
         cardData.chance = parseGoogleSheet(chanceData);
         cardData.fate = parseGoogleSheet(fateData);
 
-        if (cardData.chance.length === 0 || cardData.fate.length === 0) {
-            throw new Error('工作表可能為空或欄位名稱錯誤。');
+        // 【★ 關鍵修正 3 ★】
+        // 必須「兩個」牌庫都為空才拋出錯誤
+        if (cardData.chance.length === 0 && cardData.fate.length === 0) { 
+            throw new Error('兩個牌庫都為空，請檢查 Google Sheet 是否已填入資料 (非只有標題)。');
         }
 
         // 資料載入成功，初始化遊戲
@@ -149,7 +148,7 @@ async function loadGameData() {
         console.error('載入資料失敗:', error);
         loadingText.innerHTML = `
             <span class="text-red">資料載入失敗！</span><br>
-            <span style="font-size: 1rem;">錯誤原因: ${error.message}<br>請確認 GID 與欄位標題正確。</span>
+            <span style="font-size: 1rem;">錯誤原因: ${error.message}<br>請確認 GID 與欄位標題正確，且至少一個工作表有資料。</span>
         `;
     }
 }
@@ -373,13 +372,8 @@ drawButton.addEventListener('click', () => {
     }
 });
 
-// 點擊「繼續抽取」
 btnContinue.addEventListener('click', goHome);
-
-// 點擊「重置牌庫」 (結果頁)
 btnReset.addEventListener('click', handleReset);
-
-// 點擊「重置牌庫」 (首頁)
 btnResetHome.addEventListener('click', handleReset);
 
 // --- 6. 程式啟動 ---
