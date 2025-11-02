@@ -40,14 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
             { id: 'C2', title: '醫療資源抵達', description: '無國界醫生或友軍醫療團設立了臨時醫療站。', type: 'outcome', effect: '全組 健康點數 +6。若有特殊身份者，該成員額外 +3 點。' },
             { id: 'C3', title: '幸運的發現', description: '你在巡視時，發現一間被遺棄的雜貨店還剩下一些有用的東西。', type: 'outcome', effect: '獲得「罐頭 x5」與「照明設備 x1」。' },
             { id: 'C4', title: '可靠的情報', description: '你的收音機接收到友軍的安全廣播，提振了士氣。', type: 'outcome', effect: '全組 健康點數 +3。(若無收音機則無效)' },
-            { id: 'C5', title: '意外的潔淨水源', description: '你發現一處未受污染的隱藏水源（例如：未被發現的井）。', type: 'outcome', effect: '獲得「水 +20L」若有濾水器，則「水 +30L」。' },
+            { id: 'C5', title: '意外的潔淨水源', description: '你發現一處未受污染的隱藏水源（例如：未被發現的井）。', type: 'outcome', effect: '獲得「水 +20L」若有濾水器，則獲得「水 +30L」。' },
             { id: 'C6', title: '物資腐敗 (陷阱)', description: '你打開一箱存糧，發現因為儲存不當，已經全部腐敗發霉。', type: 'outcome', effect: '損失 20% 的食物。' },
             { id: 'C7', title: '假情報 (陷阱)', description: '你們聽到假消息，以為有空投物資，冒險外出卻一無所獲。', type: 'outcome', effect: '全組 健康點數 -3。並額外 損失「水 -1L」與「乾糧 -1包」。' },
             
             // --- 原始 7 張 (來自上次更新) ---
             { id: 'C8', title: '鄰居的善意', description: '一位友善的鄰居與你分享了多餘的物資。', type: 'outcome', effect: '獲得「醫療包 x1」與「水 x5L」。' },
             // 【★ 修正 #3 ★】
-            { id: 'C9', title: '搜到醫療箱', description: '你在廢棄的車輛中找到一個完整的醫療箱。', type: 'outcome', effect: '獲得「醫療包 x1」、「消毒用品(酒精) x4L」與「水 x5L」。' },
+            { id: 'C9', title: '搜到醫療箱', description: '你在廢棄的車輛中找到一個完整的醫療箱。', type: 'outcome', effect: '獲得「醫療包 x2」與「水 x5L」。' },
             { id: 'C10', title: '衛生用品補給', description: '人道組織空投了一批衛生用品，你撿到了包裹。', type: 'outcome', effect: '獲得「水 x2L」與「醫療包 x1」。' },
             { id: 'C11', title: '臨時通訊站', description: '友軍架設了臨時通訊站，你成功聯絡上家人報平安。', type: 'outcome', effect: '全組 健康點數 +3。若有無線電則全組 健康點數 +6' },
             { id: 'C12', title: '能源補給', description: '你找到一包未開封的物資。', type: 'outcome', effect: '獲得「米 x10kg」與「照明設備 x1」。' },
@@ -384,3 +384,4 @@ document.addEventListener('DOMContentLoaded', () => {
     goHome(); // 顯示主畫面並開始閃動
 
 });
+
