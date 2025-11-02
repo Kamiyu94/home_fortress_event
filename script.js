@@ -1,6 +1,6 @@
 // 【★ 請您再次確認這 3 行是您正確的 GID ★】
 const SPREADSHEET_ID = '1pEwL40e9FDGOV5b9o1lLEDhr_MSrIYqFrHmn89WFFko'; 
-const CHANCE_SHEET_GID = '0'; // <--- 您的 Chance GID
+const CHANCE_SHEET_GID = '0'; // <--- 您的 Chance GID (已確認)
 const FATE_SHEET_GID = '995792555'; // <--- 您的 Fate GID (請替換!)
 
 // Google Visualization API URL 格式 (最穩定)
@@ -48,7 +48,7 @@ let determinedDeck = null;
 
 // --- 4. 核心功能 ---
 
-// 【★ 修正後的解析函式，處理空工作表 ★】
+// 【★ v12 修正版解析器 ★】
 function parseGoogleSheet(data) {
     const jsonText = data.match(/google\.visualization\.Query\.setResponse\((.*)\);/);
     if (!jsonText || !jsonText[1]) {
@@ -56,56 +56,85 @@ function parseGoogleSheet(data) {
     }
     const queryData = JSON.parse(jsonText[1]);
     
-    // 【★ 關鍵修正 1 ★】
-    // 檢查 table 和 cols 是否存在
-    if (!queryData.table || !queryData.table.cols) {
-         throw new Error("工作表結構錯誤，找不到欄位 (cols)。請確認 GID 是否指向了正確的工作表。");
+    if (!queryData.table || !queryData.table.rows || queryData.table.rows.length === 0) {
+        // 工作表是空的 (連標題都沒有)
+        return [];
     }
+
+    const rows = queryData.table.rows;
     
-    const cols = queryData.table.cols;
-    const headers = cols.map(col => col.label);
-    
-    // 【★ 關鍵修正 2 ★】
-    // 檢查 rows 是否存在，如果不存在 (null)，則視為空陣列
-    const rows = queryData.table.rows || []; 
+    // 【★ 關鍵修正 1 ★】
+    // 從第一行 (rows[0]) 讀取標題
+    const headerRow = rows[0].c;
+    const headers = headerRow.map(cell => (cell ? cell.v : ''));
+
+    // 建立標題索引 (例如: {id: 0, title: 1, description: 2, ...})
+    const headerIndex = {};
+    headers.forEach((header, i) => {
+        if (header) { // 忽略空標題
+            headerIndex[header] = i;
+        }
+    });
+
+    // 檢查必要的標題是否存在
+    if (headerIndex.id === undefined || headerIndex.title === undefined || headerIndex.type === undefined) {
+        throw new Error(`工作表標題列不正確。必須包含 'id', 'title', 'type' 欄位。`);
+    }
+
     const cards = [];
 
-    rows.forEach(row => {
-        const rowValues = row.c;
-        if (!rowValues) return;
+    // 【★ 關鍵修正 2 ★】
+    // 從第二行 (i = 1) 開始讀取事件資料
+    for (let i = 1; i < rows.length; i++) {
+        const rowValues = rows[i].c;
+        if (!rowValues) continue;
 
-        const card = { choices: [] };
-        let choiceIndex = 1;
-
-        headers.forEach((header, i) => {
-            const value = rowValues[i] && rowValues[i].v !== null ? rowValues[i].v : (rowValues[i] && rowValues[i].f ? rowValues[i].f : '');
-            
-            if (header.startsWith('choice') && header.endsWith('text')) {
-                if (value) {
-                    card.choices.push({
-                        text: value,
-                        effect: '' 
-                    });
-                }
-            } else if (header.startsWith('choice') && header.endsWith('effect')) {
-                if (card.choices.length >= choiceIndex) {
-                    card.choices[choiceIndex - 1].effect = value;
-                }
-                choiceIndex++;
-            } else {
-                card[header] = value;
+        // 輔助函數：安全地獲取儲存格的值
+        const getValue = (colName) => {
+            const index = headerIndex[colName];
+            if (index === undefined || !rowValues[index]) {
+                return ''; // 如果欄位不存在或儲存格為空，返回空字串
             }
-        });
-        
-        card.choices = card.choices.filter(c => c.text);
+            return rowValues[index].v || (rowValues[index].f || '');
+        };
 
-        if (card.type === 'outcome' || card.type === '') {
+        const card = {
+            id: getValue('id'),
+            title: getValue('title'),
+            description: getValue('description'),
+            type: getValue('type') || 'outcome', // 預設為 outcome
+            effect: getValue('effect'),
+            choices: []
+        };
+
+        if (card.type === 'choice') {
+            const choice1Text = getValue('choice1text');
+            if (choice1Text) {
+                card.choices.push({
+                    text: choice1Text,
+                    effect: getValue('choice1effect')
+                });
+            }
+            
+            const choice2Text = getValue('choice2text');
+            if (choice2Text) {
+                card.choices.push({
+                    text: choice2Text,
+                    effect: getValue('choice2effect')
+                });
+            }
+        }
+
+        if (card.type === 'outcome') {
             delete card.choices;
         }
         
-        cards.push(card);
-    });
-    return cards.filter(card => card.id); 
+        // 確保只加入有 ID 的卡片
+        if (card.id) {
+            cards.push(card);
+        }
+    }
+    return cards;
 }
 
 /**
@@ -134,8 +163,6 @@ async function loadGameData() {
         cardData.chance = parseGoogleSheet(chanceData);
         cardData.fate = parseGoogleSheet(fateData);
 
-        // 【★ 關鍵修正 3 ★】
-        // 必須「兩個」牌庫都為空才拋出錯誤
         if (cardData.chance.length === 0 && cardData.fate.length === 0) { 
             throw new Error('兩個牌庫都為空，請檢查 Google Sheet 是否已填入資料 (非只有標題)。');
         }
