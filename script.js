@@ -1,11 +1,11 @@
 // 【★ 請您將以下兩行修改為您實際的 GID 值 ★】
 const CHANCE_SHEET_GID = '0'; // 這是您 Chance 牌庫的 GID
-const FATE_SHEET_GID = 'YOUR_FATE_GID'; // <--- 請替換為您 Fate 工作表的實際 GID 號碼
+const FATE_SHEET_GID = '995792555'; // <--- 請替換為您 Fate 工作表的實際 GID 號碼
 
 // 【★ 請使用以下程式碼完整替換您的 script.js 內容 ★】
 const SPREADSHEET_ID = '1pEwL40e9FDGOV5b9o1lLEDhr_MSrIYqFrHmn89WFFko'; 
 const CHANCE_SHEET_GID = '0'; // 這是您 Chance 牌庫的 GID (已確認為 0)
-const FATE_SHEET_GID = '1234567890'; // <--- 請替換為您 Fate 工作表的實際 GID 號碼！
+const FATE_SHEET_GID = '995792555'; // <--- 請替換為您 Fate 工作表的實際 GID 號碼！
 
 // Google Visualization API URL 格式 (最穩定)
 const SHEETS_V4_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&gid=`;
