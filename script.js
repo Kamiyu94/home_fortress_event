@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. 等待 500ms 後自動跳轉
         setTimeout(() => {
             showLoading(finalResult);
-        }, 500);
+        }, 1000);
     }
 
     // 強制選擇 (當只剩一個牌庫時)
